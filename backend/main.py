@@ -1,8 +1,11 @@
 import dashscope
 from dashscope import Generation
 from dashscope.api_entities.dashscope_response import Role
-import .env
-dashscope.api_key=DASHSCOPE_API_KEY
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+dashscope.api_key=os.getenv("DASHSCOPE_API_KEY")
 
 def call_with_messages():
     messages = []

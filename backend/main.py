@@ -33,7 +33,6 @@ def chat_post():
             )
             for response in responses:
                 content = response.output.choices[0]["message"]["content"]
-                print(f"Sending: {content}")  # 添加日志
                 accumulated_messages.append(content)  # 累积消息
 
             # 最后一次性返回所有消息

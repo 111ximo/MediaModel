@@ -1,57 +1,45 @@
-<script>
-export default {
-    data() {
-        return {
-            userMessage: '',
-            messages: [],
-            eventSource: null
-        };
-    },
-    methods: {
-        async sendMessage() {
-    if (!this.userMessage) return;
+<script setup>
+import { ref, onBeforeUnmount } from 'vue';
 
-    this.messages.push({ role: 'User', content: this.userMessage });
+const userMessage = ref('');
+const messages = ref([]);
 
-    // 发送 POST 请求，后台将开始流式输出
+const sendMessage = async () => {
+    if (!userMessage.value) return;
+
+    messages.value.push({ role: 'User', content: userMessage.value });
+
     const response = await fetch('http://localhost:5000/chat', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: this.userMessage }),
+        body: JSON.stringify({ message: userMessage.value }),
     });
 
-    // 处理流式响应
     if (response.ok) {
         const reader = response.body.getReader();
         const decoder = new TextDecoder("utf-8");
         let done, value;
 
-        // 持续读取数据
         while ({ done, value } = await reader.read(), !done) {
             const chunk = decoder.decode(value, { stream: true });
-            // 处理接收到的每一块数据
-            const messages = chunk.split("\n\n").filter(Boolean);
-            for (const message of messages) {
+            const newMessages = chunk.split("\n\n").filter(Boolean);
+            for (const message of newMessages) {
                 if (message.startsWith("data: ")) {
-                    const content = message.substring(6); // 去掉前缀
-                    this.messages.push({ role: 'Assistant', content });
+                    const content = message.substring(6);
+                    messages.value.push({ role: 'Assistant', content });
                 }
             }
         }
     }
 
-    // 清空输入框
-    this.userMessage = '';
-}
-    },
-    beforeDestroy() {
-        if (this.eventSource) {
-            this.eventSource.close(); // 组件销毁时关闭连接
-        }
-    }
+    userMessage.value = '';
 };
+
+onBeforeUnmount(() => {
+    // 可以在这里关闭连接等清理操作
+});
 </script>
 
 <template>

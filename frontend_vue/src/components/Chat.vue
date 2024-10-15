@@ -15,7 +15,7 @@ const sendMessage = async () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage.value }),
     });
-
+    userMessage.value = ''; // 清空输入框
     if (response.ok) {
         const reader = response.body.getReader();
         const decoder = new TextDecoder('utf-8');
@@ -107,7 +107,9 @@ const setActiveButton = (button) => {
     width: 100vw;
 
     align-items: center;
-    background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+    background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%); 
+
+
 }
 
 
@@ -173,12 +175,12 @@ const setActiveButton = (button) => {
     height: 96%;
     border: none;
     padding: 10px;
+     /* 使子元素垂直排列 */
     flex-direction: column;
     background: white;
-    /* 使子元素垂直排列 */
     border-radius: 15px;
     backdrop-filter: brightness(96%);
-    background-color: rgba(255, 255, 255, 0.79);
+    background-color: rgba(255, 255, 255, 0.5);
     border-radius: 10px
 }
 
@@ -189,8 +191,6 @@ const setActiveButton = (button) => {
     /* 垂直排列 */
     justify-content: center;
     /* 水平居中 */
-    flex-direction: column;
-    /* 垂直排列 */
     top: 50%;
     left: 55%;
     transform: translate(-50%, -50%);
@@ -224,27 +224,21 @@ const setActiveButton = (button) => {
 .message-content {
     white-space: pre-wrap; /* 保留空格和换行符 */
     word-wrap: break-word;
+    margin-left: auto;
+    margin-right: auto;
     width:60%;
 }
 .user-message {
     margin: 30px 0;
-    width: 30%;
-    border-radius: 5px;
-    /* User 消息的背景色 */
-    margin-left: auto;
     /* 向右对齐 */
     text-align: right;
-    margin-right: 20%;
     z-index: 1;
 }
 
 .assistant-message {
     margin: 5px 0;
-    /* Assistant 消息的背景色 */
-    margin-right: auto;
     /* 向左对齐 */
     text-align: left;
-    margin-left: 20%;
     z-index: 1;
 }
 

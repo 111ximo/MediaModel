@@ -3,40 +3,45 @@ import { ref } from 'vue';
 import { Top, Comment, UserFilled } from '@element-plus/icons-vue';
 const userMessage = ref('');//存储用户输入的消息
 const messages = ref([]);//存储所有的聊天记录
-const activeButton=ref('');
+const activeButton = ref('');
 const sendMessage = async () => {
     if (!userMessage.value) return;
-    //添加用户消息到聊天记录
+
+    // 添加用户消息到聊天记录
     messages.value.push({ role: 'User', content: userMessage.value });
 
     const response = await fetch('http://localhost:5000/chat', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage.value }),
     });
 
     if (response.ok) {
         const reader = response.body.getReader();
-        const decoder = new TextDecoder("utf-8");
-        let done, value;
+        const decoder = new TextDecoder('utf-8');
 
+        let done, value;
         while ({ done, value } = await reader.read(), !done) {
             const chunk = decoder.decode(value, { stream: true });
-            const newMessages = chunk.split("\n\n").filter(Boolean);
-            for (const message of newMessages) {
-                if (message.startsWith("data: ")) {
-                    const content = message.substring(6);
-                    messages.value.push({ role: 'Assistant', content });
-                }
-            }
+
+            // 拆分并解析 SSE 消息块
+            const newMessages = chunk
+                .split('\n\n') // 按消息块分割
+                .filter(Boolean) // 过滤空块
+                .map(msg => msg.replace(/^data: /, '').trim()); // 去掉前缀并清理
+
+            // 将每条解析后的消息加入聊天记录
+            newMessages.forEach(content => {
+                messages.value.push({ role: 'Assistant', content });
+            });
+
+            scrollToBottom(); // 确保自动滚动到底部
         }
     }
 
-    userMessage.value = '';
-    
+    userMessage.value = ''; // 清空输入框
 };
+
 const setActiveButton = (button) => {
     activeButton.value = button;
 };
@@ -46,15 +51,21 @@ const setActiveButton = (button) => {
 <template>
     <div class="container">
         <div class="aside">
-            <el-button class="button" :class="{ 'is-active': activeButton === 'chat' }" @click="setActiveButton('chat')">
-                <el-icon><Comment /></el-icon>
+            <el-button class="button" :class="{ 'is-active': activeButton === 'chat' }"
+                @click="setActiveButton('chat')">
+                <el-icon>
+                    <Comment />
+                </el-icon>
                 <span>对话</span></el-button><br />
-            <el-button class="button" :class="{ 'is-active': activeButton === 'user' }" @click="setActiveButton('user')">
-                <el-icon :size="30"><UserFilled /></el-icon>
+            <el-button class="button" :class="{ 'is-active': activeButton === 'user' }"
+                @click="setActiveButton('user')">
+                <el-icon :size="30">
+                    <UserFilled />
+                </el-icon>
                 <span>主页</span></el-button>
         </div>
         <div class="chat-container">
-            <div class="background"  v-if="messages.length === 0">
+            <div class="background" v-if="messages.length === 0">
                 <el-icon color="white" size="40">
                     <Service />
                 </el-icon>
@@ -86,14 +97,15 @@ const setActiveButton = (button) => {
     padding: 0;
     box-sizing: border-box;
     font-family: 'Arial', sans-serif;
-    
+
 }
+
 .container {
     display: flex;
     height: 100vh;
     /* 使容器占满整个视口高度 */
-    width:100vw;
-    
+    width: 100vw;
+
     align-items: center;
     background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
 }
@@ -114,33 +126,40 @@ const setActiveButton = (button) => {
 
 .button {
     display: flex;
-    flex-direction: column; /* 垂直排列 */
-    justify-content: center; /* 水平居中 */
-    align-items: center;     /* 垂直居中 */
+    flex-direction: column;
+    /* 垂直排列 */
+    justify-content: center;
+    /* 水平居中 */
+    align-items: center;
+    /* 垂直居中 */
     width: 100%;
     height: 100px;
     margin: 0;
     background-color: #ddc3fc;
     color: black;
-    text-align: center; /* 确保文字居中 */
+    text-align: center;
+    /* 确保文字居中 */
     border: none;
 }
 
 .button .el-icon {
-    margin-bottom: 10px; /* 图标和文字之间的间距 */
-    font-size:30px;
+    margin-bottom: 10px;
+    /* 图标和文字之间的间距 */
+    font-size: 30px;
     margin-left: 7px;
 }
 
 .button span {
-    display: block; /* 确保文字单独占一行 */
-    font-size:15px;
+    display: block;
+    /* 确保文字单独占一行 */
+    font-size: 15px;
 }
 
 .button:hover {
     background-color: #ddc3fc;
     color: white;
 }
+
 .container .aside .is-active {
     background-color: #ddc3fc;
     color: white;
@@ -149,27 +168,29 @@ const setActiveButton = (button) => {
 .chat-container {
     flex: 1;
     display: flex;
-    margin:0;
+    margin: 0;
     max-width: 94%;
     height: 96%;
     border: none;
     padding: 10px;
     flex-direction: column;
-    background:white;
+    background: white;
     /* 使子元素垂直排列 */
     border-radius: 15px;
     backdrop-filter: brightness(96%);
     background-color: rgba(255, 255, 255, 0.79);
     border-radius: 10px
-    
 }
 
 .background {
     position: absolute;
-    display:flex;
-    flex-direction: column; /* 垂直排列 */
-    justify-content: center; /* 水平居中 */
-    flex-direction: column; /* 垂直排列 */
+    display: flex;
+    flex-direction: column;
+    /* 垂直排列 */
+    justify-content: center;
+    /* 水平居中 */
+    flex-direction: column;
+    /* 垂直排列 */
     top: 50%;
     left: 55%;
     transform: translate(-50%, -50%);
@@ -178,8 +199,8 @@ const setActiveButton = (button) => {
     z-index: -1;
 }
 
-.background .el-icon{
-    margin-left:20px;
+.background .el-icon {
+    margin-left: 20px;
     margin-bottom: 10px;
     color: black;
 }
@@ -195,19 +216,25 @@ const setActiveButton = (button) => {
     overflow-y: auto;
     margin-bottom: 10px;
     z-index: 1;
-    color:rgba(0, 0, 0);
-    font-size: 20px;
+    color: rgba(0, 0, 0);
+    font-size: 15px;
+    line-height:2;
 }
 
+.message-content {
+    white-space: pre-wrap; /* 保留空格和换行符 */
+    word-wrap: break-word;
+    width:60%;
+}
 .user-message {
-    margin: 20px 0;
+    margin: 30px 0;
     width: 30%;
     border-radius: 5px;
     /* User 消息的背景色 */
     margin-left: auto;
     /* 向右对齐 */
     text-align: right;
-    margin-right:20%;
+    margin-right: 20%;
     z-index: 1;
 }
 
@@ -217,7 +244,7 @@ const setActiveButton = (button) => {
     margin-right: auto;
     /* 向左对齐 */
     text-align: left;
-    margin-left:20%;
+    margin-left: 20%;
     z-index: 1;
 }
 
@@ -228,11 +255,11 @@ const setActiveButton = (button) => {
     padding: 10px 0;
     /* 添加顶部边框 */
     justify-content: center;
-    width:100%;
+    width: 100%;
 }
 
 .input {
-    flex:1;
+    flex: 1;
     width: 100%;
     height: 50px;
     border: 1px solid #ccc;
@@ -241,12 +268,12 @@ const setActiveButton = (button) => {
     backdrop-filter: blur(10px) brightness(90%);
     background-color: rgba(255, 255, 255, 0.5);
     border-radius: 30px
-
 }
 
-.input:hover{
+.input:hover {
     border: 1px solid #9473f4;
 }
+
 .input-button {
     background-color: #ccc;
     height: 40px;

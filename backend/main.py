@@ -33,10 +33,13 @@ def chat_post():
             )
             for response in responses:
                 content = response.output.choices[0]["message"]["content"]
+                print(f"System: {content}")
                 accumulated_messages.append(content)  # 累积消息
+                print(f"Accumulated messages: {accumulated_messages}")
 
             # 最后一次性返回所有消息
             combined_message = "\n".join(accumulated_messages)
+            print(f"Combined message: {combined_message}")
             yield f"data: {combined_message}\n\n"
 
         except Exception as e:

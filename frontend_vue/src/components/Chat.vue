@@ -54,15 +54,16 @@ const setActiveButton = (button) => {
                 <span>主页</span></el-button>
         </div>
         <div class="chat-container">
-            <div class="background"><el-icon>
+            <div class="background"  v-if="messages.length === 0">
+                <el-icon color="white" size="40">
                     <Service />
                 </el-icon>
-                <span class="background-text">What can I help you?</span>
+                <span class="background-text">你的AI助手</span>
             </div>
             <div class="messages">
                 <div v-for="(msg, index) in messages" :key="index"
                     :class="['message', msg.role === 'User' ? 'user-message' : 'assistant-message']">
-                    <strong>{{ msg.role }}:</strong> {{ msg.content }}
+                    <pre class="message-content">{{ msg.content }}</pre>
                 </div>
             </div>
             <div class="input_container">
@@ -92,8 +93,9 @@ const setActiveButton = (button) => {
     height: 100vh;
     /* 使容器占满整个视口高度 */
     width:100vw;
-    background: linear-gradient(to right, #9473f4, #917bf3,#d5daff,#c8c3ff,#d6dbff);
+    
     align-items: center;
+    background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
 }
 
 
@@ -118,8 +120,8 @@ const setActiveButton = (button) => {
     width: 100%;
     height: 100px;
     margin: 0;
-    background-color: #9473f4;
-    color: #c8c3ff;
+    background-color: #ddc3fc;
+    color: black;
     text-align: center; /* 确保文字居中 */
     border: none;
 }
@@ -136,42 +138,56 @@ const setActiveButton = (button) => {
 }
 
 .button:hover {
-    background-color: #9473f4;
+    background-color: #ddc3fc;
     color: white;
 }
 .container .aside .is-active {
-    background-color: #9473f4;
+    background-color: #ddc3fc;
     color: white;
 }
 
 .chat-container {
     flex: 1;
     display: flex;
-    margin: 0;
-    max-width: 88%;
-    height: 98%;
+    margin:0;
+    max-width: 94%;
+    height: 96%;
     border: none;
     padding: 10px;
     flex-direction: column;
     background:white;
     /* 使子元素垂直排列 */
-    border-radius: 30px;
+    border-radius: 15px;
+    backdrop-filter: brightness(96%);
+    background-color: rgba(255, 255, 255, 0.79);
+    border-radius: 10px
+    
 }
 
 .background {
     position: absolute;
+    display:flex;
+    flex-direction: column; /* 垂直排列 */
+    justify-content: center; /* 水平居中 */
+    flex-direction: column; /* 垂直排列 */
     top: 50%;
-    left: 60%;
+    left: 55%;
     transform: translate(-50%, -50%);
     width: 15%;
     height: 3%;
     z-index: -1;
 }
 
+.background .el-icon{
+    margin-left:20px;
+    margin-bottom: 10px;
+    color: black;
+}
+
 .background-text {
-    margin-left: 10px;
-    font-size: 20px;
-    color: rgba(0, 0, 0, 0.5);
+    margin-left: 0;
+    font-size: 18px;
+    color: black;
 }
 
 .messages {
@@ -179,6 +195,8 @@ const setActiveButton = (button) => {
     overflow-y: auto;
     margin-bottom: 10px;
     z-index: 1;
+    color:rgba(0, 0, 0);
+    font-size: 20px;
 }
 
 .user-message {
@@ -190,7 +208,6 @@ const setActiveButton = (button) => {
     /* 向右对齐 */
     text-align: right;
     margin-right:20%;
-    font-size: 20px;
     z-index: 1;
 }
 
@@ -200,7 +217,6 @@ const setActiveButton = (button) => {
     margin-right: auto;
     /* 向左对齐 */
     text-align: left;
-    font-size: 20px;
     margin-left:20%;
     z-index: 1;
 }
@@ -221,9 +237,10 @@ const setActiveButton = (button) => {
     height: 50px;
     border: 1px solid #ccc;
     padding: 5px;
-    color: rgba(244, 244, 244, 255);
-    border-radius: 30px;
-
+    color: black;
+    backdrop-filter: blur(10px) brightness(90%);
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 30px
 
 }
 
